@@ -17,8 +17,10 @@ public class Main {
                 System.out.print(postfiksni[i].value+" ");
             }
         }
-
-//        int resenje=izracunaj(postfiksni);
+        System.out.println();
+        int resenje=izracunaj(postfiksni,0,postfiksni.length-1);
+        System.out.println();
+        System.out.println(resenje);
     }
 
     public static LinkedList<Token> podeliIzraz(String izraz){
@@ -66,7 +68,7 @@ public class Main {
                 stack.push(t);
                 continue;
             }
-            while ((!stack.isEmpty())&&stack.peek().prioritet>t.prioritet){
+            while ((!stack.isEmpty())&&stack.peek().prioritet>=t.prioritet){
                 resenje[i]=stack.pop();
                 i++;
             }
@@ -78,7 +80,39 @@ public class Main {
         }
         return resenje;
     }
-    public static int izracunaj(Token[] niz){
+
+    public static int izracunaj(Token[] niz,int pocetak,int kraj){
+        if(pocetak==kraj)return niz[pocetak].value;
+        if(kraj-pocetak==2){
+            return izracunaj3(niz[pocetak+2].operator,niz[pocetak].value,niz[pocetak+1].value);
+        }
+        int podela=podeli(niz,kraj);
+        int v1=izracunaj(niz,pocetak,podela-1);
+        int v2=izracunaj(niz,podela,kraj-1);
+        int v=izracunaj3(niz[kraj].operator,v1,v2);
+        System.out.print(v+" ");
+        return v;
+    }
+    public static int izracunaj3(char operator,int value1,int value2){
+        if(operator=='/')return value1/value2;
+        if(operator=='*')return value1*value2;
+        if(operator=='-')return value1-value2;
+        if(operator=='+')return value1+value2;
+        return 0;
+    }
+    public static int podeli(Token[]niz ,int kraj){
+        kraj--;
+        int brojOperatora=0;
+        int brojBrojeva=0;
+        while (kraj>0){
+            if(niz[kraj].isOperator){
+                brojOperatora++;
+            }else{
+                brojBrojeva++;
+            }
+            if(brojBrojeva==brojOperatora+1)return kraj;
+            kraj--;
+        }
         return 0;
     }
 }
