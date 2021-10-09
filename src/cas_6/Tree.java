@@ -63,11 +63,87 @@ public class Tree {
 
     private void balans(Node neBalansiran,int value){
         Node A=neBalansiran;
-        Node B=value>A.value?A.right:A.left;
-        Node C=value>B.value?B.right:B.left;
-        if(A.value<B.value&&B.value<C.value){
-            
-        }
+        Node B=value>=A.value?A.right:A.left;
+        Node C=value>=B.value?B.right:B.left;
 
+        Node nA=new Node(A.value);
+        Node nB=new Node(B.value);
+        Node nC=new Node(C.value);
+
+        if(B.value>A.value&&C.value>B.value){
+            nA.left=A.left;
+            nA.right=B.left;
+
+            nB.left=nA;
+            nB.right=nC;
+
+            nC.left=C.left;
+            nC.right=C.right;
+
+            A.value=nB.value;
+            A.left=nB.left;
+            A.right=nB.right;
+        }
+        if(B.value>A.value&&C.value<B.value){
+            nC.left=nA;
+            nC.right=nB;
+
+            nA.left=A.left;
+            nA.right=C.left;
+
+            nB.left=C.right;
+            nB.right=B.right;
+
+            A.value=nC.value;
+            A.right=nC.right;
+            A.left=nC.left;
+        }
+        if(B.value<A.value&&C.value<B.value){
+            nB.left=nC;
+            nB.right=nA;
+
+            nC.left=C.left;
+            nC.right=C.right;
+
+            nA.left=B.right;
+            nA.right=A.right;
+
+            A.value=nB.value;
+            A.right=nB.right;
+            A.left= nB.left;
+        }
+        if(B.value<A.value&&C.value>B.value){
+            nC.left=nB;
+            nC.right=nA;
+
+            nB.left=B.left;
+            nB.right=C.left;
+
+            nA.left= C.right;
+            nA.right=A.right;
+
+            A.value=nC.value;
+            A.right=nC.right;
+            A.left= nC.left;
+        }
+    }
+
+    public void printHeights(){
+        calcHeightsR(root);
+        printHeightsR(root);
+    }
+    private int calcHeightsR(Node root){
+        if(root==null)return 0;
+        int hl=calcHeightsR(root.left);
+        int hr=calcHeightsR(root.right);
+        int h=hl>hr?hl+1:hr+1;
+        root.h=h;
+        return h;
+    }
+    public void printHeightsR(Node root){
+        if(root==null)return;
+        printHeightsR(root.left);
+        System.out.print(root.h+" ");
+        printHeightsR(root.right);
     }
 }
