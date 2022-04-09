@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simpleflutterproject/Task.dart';
+import 'package:simpleflutterproject/TaskWidget.dart';
 
 class TasksTab extends StatefulWidget {
   final List<Task> tasks;
@@ -22,42 +23,15 @@ class _TasksTabState extends State<TasksTab> {
       );
     }
 
-      
+    List<Widget> children=[];  
+
+    for(int i=0;i<widget.tasks.length;i++){
+      children.add(TaskWidget(widget.tasks[i]));
+    }
 
     return ListView(
-      children: widget.tasks.asMap().map((i, task) {
-        return MapEntry(i,
-          GestureDetector(
-              onHorizontalDragUpdate: (args){setState((){
-                offset+=args.delta.dx;
-              });
-              },
-              child: Stack(
-              children:[
-                Container(color: Colors.red,),
-                Transform.translate(
-                    offset: Offset(offset,0),
-                    child: Container(
-                    color:Colors.white,
-                    child:Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                      Text(task.name),
-                      Switch(
-                        value: task.done,
-                        onChanged:(value){setState((){
-                          widget.tasks[i].done=value;
-                        });
-                        }
-                      )
-                    ],)
-                  ),
-                )
-              ]
-            ),
-          )
-        );
-      }).values.toList(),
+      children:children
     );
+    
   }
 }
