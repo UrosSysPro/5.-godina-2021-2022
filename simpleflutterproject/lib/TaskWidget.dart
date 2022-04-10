@@ -11,9 +11,45 @@ class TaskWidget extends StatefulWidget {
   _TaskWidgetState createState() => _TaskWidgetState();
 }
 
-class _TaskWidgetState extends State<TaskWidget> {
+class _TaskWidgetState extends State<TaskWidget> with SingleTickerProviderStateMixin{
+
+  
 
   double offset=0;
+  late AnimationController controller;
+  //1 je levo 
+  //2 je desno
+  int strana=1;
+  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller=AnimationController(
+      duration: Duration(milliseconds: 300),
+      vsync: this
+    );
+    controller.addListener(() { 
+      setState((){
+        if(strana==2){
+          offset=context.size!.width*controller.value;
+        }else{
+          offset=-context.size!.width*controller.value;
+        }
+      });
+    });
+    controller.addStatusListener((status){
+      if(status==AnimationStatus.completed&&strana==2){
+        
+      }
+    });
+
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +57,19 @@ class _TaskWidgetState extends State<TaskWidget> {
       onHorizontalDragUpdate: (details){
         setState((){
           offset+=details.delta.dx;
+        });
+      },
+      onHorizontalDragEnd: (details){
+        setState((){
+          if(offset>0){
+            strana=2;
+            controller.value=offset/context.size!.width;
+            controller.reverse();
+          }else{
+            strana=1;
+            controller.value=-offset/context.size!.width;
+            controller.reverse();
+          }
         });
       },
       child: Stack(

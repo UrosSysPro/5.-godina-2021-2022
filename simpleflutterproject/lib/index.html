@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div{
+            animation: animacija 3s;
+            animation-timing-function: cubic-bezier(0, -1.6, 0.67, 2.48);
+            width: 100px;
+            height: 100px;
+            background-color: aqua;
+        }
+        @keyframes animacija{
+            0%{
+                transform: translateX(0);
+            }
+            100%{
+                transform: translateX(200px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div></div>
+</body>
+</html>
