@@ -12,20 +12,34 @@ class _GameWindowState extends State<GameWindow> with SingleTickerProviderStateM
   Game game=Game();
 
   late AnimationController controller;
+  double oldValue=0;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
     controller=AnimationController(
       vsync: this,
-      duration: Duration(seconds: 100),
+      duration: Duration(seconds: 1),
     );
+
     controller.addListener(() {setState((){
-      game.update();
-//      print("ee");
+      double delta=controller.value-oldValue;
+      game.update(delta);
+      oldValue=controller.value;
+      
     });});
-    controller.forward();
+
+    controller.addStatusListener((status){
+      if(status==AnimationStatus.completed){
+        oldValue=0;
+        controller.value=0;
+        
+        controller.forward();
+      }
+    });
+
+    // controller.forward();
   }
   @override
   void dispose() {
@@ -47,8 +61,13 @@ class _GameWindowState extends State<GameWindow> with SingleTickerProviderStateM
   }
 
   Widget displayGame(){
-    return CustomPaint(
-      painter: GamePainter(game),
+    return GestureDetector(
+      onTap: (){
+        game.player.input();
+      },  
+      child: CustomPaint(
+        painter: GamePainter(game),
+      ),
     );
   }
 
@@ -58,6 +77,7 @@ class _GameWindowState extends State<GameWindow> with SingleTickerProviderStateM
       children: [
         createMenuButton("Start", () {setState(() {
           game.state=GameState.running;
+          controller.forward();
         }); }),
         createMenuButton("Quit", () { }),
       ],
@@ -91,30 +111,14 @@ class GamePainter extends CustomPainter{
 
   @override
   void paint(Canvas canvas, Size size) {
-
-    var paint=Paint();
-    paint.color=game.player.color;
-    paint.style=PaintingStyle.fill;
-    double l=game.player.x;
-    double t=game.player.y;
-    double r=l+game.player.width;
-    double b=t+game.player.height;
-    canvas.drawRect(Rect.fromLTRB(l,t,r,b), paint);
-
-    for(int i=0;i<game.platforms.length;i++){
-      l=game.platforms[i].x;
-      t=game.platforms[i].y;
-      r=game.platforms[i].width+l;
-      b=game.platforms[i].height+t;
-      paint.color=game.platforms[i].color;
-      canvas.drawRect(Rect.fromLTRB(l,t,r,b), paint);
-    }
-
-
+    game.draw(canvas, size);
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    // TODO: implement shouldRepaint
-    return true;
+    if(game.shouldReDraw){
+      game.shouldReDraw=false;
+      return true;
+    }
+    return false;
   }
 }

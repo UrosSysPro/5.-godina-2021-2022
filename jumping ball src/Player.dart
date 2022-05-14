@@ -7,17 +7,16 @@ class Player{
   late Color color;
 
   Player(this.x,this.y,this.width,this.height);
-  void update(){
+  void update(double delta){
 
   }
-  void input(InputInfo info){
+  void draw(Canvas canvas,Size size){
+
+  }
+  void input(){
 
   }
   void checkBlock(Block block){
     
   }
-}
-
-class InputInfo{
-
 }
