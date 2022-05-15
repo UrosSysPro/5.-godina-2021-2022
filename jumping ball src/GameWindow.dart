@@ -54,19 +54,29 @@ class _GameWindowState extends State<GameWindow> with SingleTickerProviderStateM
     
     switch(game.state){
       case GameState.menu:w=displayMenu();break;
-      case GameState.running:w=displayGame();break;
+      case GameState.running:w=displayGame(context);break;
       case GameState.pause:w=displayPauseMenu();break;
     }
     return w;
   }
 
-  Widget displayGame(){
-    return GestureDetector(
-      onTap: (){
-        game.player.input();
-      },  
-      child: CustomPaint(
-        painter: GamePainter(game),
+  Widget displayGame(BuildContext contex){
+    double scale=MediaQuery.of(context).size.height/600;
+    return Transform.scale(
+      scale: 1,
+      child: GestureDetector(
+        onTap: (){
+          game.player.tap();
+        },  
+        onTapDown: (args){
+          game.player.tapDown();
+        },
+        onTapUp:(args){
+          game.player.tapUp();
+        },
+        child: CustomPaint(
+          painter: GamePainter(game),
+        ),
       ),
     );
   }

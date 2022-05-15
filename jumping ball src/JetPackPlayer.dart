@@ -1,33 +1,43 @@
+import 'package:jumping_ball/Player.dart';
 import 'package:flutter/material.dart';
 import 'package:jumping_ball/Block.dart';
-import 'package:jumping_ball/Player.dart';
 
-class GravityPlayer extends Player{
-
-  late double ay,vy;
-  double maxSpeed=240;
+class JetPackPlayer extends Player{
   
+  double vy=0,ay=400,maxSpeed=240;
+  bool rocket=false;
 
-  GravityPlayer(
+  JetPackPlayer(
     double x,
     double y,
     double width,
     double height
-    ):super(x,y,width,height){
-    ay=-240;
-    vy=0;
+  ):super(x,y,width,height){
+
   }
   @override
-  void update(double delta) {
-    vy+=ay*delta;
-    if(vy>maxSpeed)vy=maxSpeed;
-    if(vy<-maxSpeed)vy=-maxSpeed;
+  void tapDown(){
+    rocket=true;
+  }
+  @override
+  void tapUp(){
+    rocket=false;
+  }
+
+  @override
+  void update(double delta){
+    if(rocket){
+      vy-=ay*delta;
+      if(vy>maxSpeed)vy=maxSpeed;
+      if(vy<-maxSpeed)vy=-maxSpeed;
+    }else{
+      vy+=ay*delta;
+      if(vy>maxSpeed)vy=maxSpeed;
+      if(vy<-maxSpeed)vy=-maxSpeed;
+    }
     y+=vy*delta;
   }
-  @override
-  void tap() {
-    ay=-ay;
-  }
+
   @override
   void checkBlock(Block block){
     if(

@@ -13,8 +13,14 @@ class Player{
   void draw(Canvas canvas,Size size){
 
   }
-  void input(){
+  void tap(){
 
+  }
+  void tapDown(){
+
+  }
+  void tapUp(){
+    
   }
   void checkBlock(Block block){
     
