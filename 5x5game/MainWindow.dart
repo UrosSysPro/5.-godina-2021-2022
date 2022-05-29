@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class MainWindow extends StatefulWidget {
   @override
@@ -32,10 +33,10 @@ class _MainWindowState extends State<MainWindow> {
     return Scaffold(
       body: Center(
         child: GestureDetector(
+
           onHorizontalDragStart: (args){
             selectedRow = (args.localPosition.dy/100).toInt();
             offset=0;
-            print(selectedRow);
           },
           onHorizontalDragUpdate: (args){
             setState(() {
@@ -45,22 +46,41 @@ class _MainWindowState extends State<MainWindow> {
 
           },
           onHorizontalDragEnd: (args){
-            selectedRow=-1;
+            setState((){
+              selectedRow=-1;
+            });
           },
           onVerticalDragStart: (args){
-            selectedColumn = (args.localPosition.dx/100).toInt();
-            offset=0;
-            print(selectedRow);
+            setState((){
+              selectedColumn = (args.localPosition.dx/100).toInt();
+              offset=0;
+            });
           },
           onVerticalDragUpdate: (args){
             setState(() {
-              offset+=args.delta.dx;
+              offset+=args.delta.dy;
               didMove=true;
             });
 
           },
           onVerticalDragEnd: (args){
-            selectedColumn=-1;
+            setState((){
+              int toMove=(offset/100).round();
+              List<int> novaKolona=[];
+              int i=selectedColumn;
+//              print(i);
+              for(int j=0;j<size;j++){
+                int novoJ=j-toMove;
+                if(novoJ<0)novoJ=size+novoJ;
+                if(novoJ>=size)novoJ%=size;
+                novaKolona.add(mat[i][novoJ]);
+                print("novoJ:${novoJ} j:${j}");
+              }
+              for(int j=0;j<size;j++)
+                mat[i][j]=novaKolona[j];
+              selectedColumn=-1;
+            });
+
           },
           child: SizedBox(
             width:500,
@@ -107,39 +127,29 @@ class GamePainter extends CustomPainter{
 
     for(int i=0;i<mat.length;i++){
       for(int j=0;j<mat[0].length;j++){
-        int r=(255/mat.length*i).toInt();
-        int g=(255/mat[0].length*j).toInt();
+        int size=mat.length;
+        int x=(mat[i][j]-1)%size;
+        int y=((mat[i][j]-1)/size).toInt();
+
+        int r=(255/mat.length*x).toInt();
+        int g=(255/mat[0].length*y).toInt();
         int b=120;
         p.color=Color.fromARGB(255, r, g, b);
-        int l=i*cellWidth;
-        int t=j*cellHeight;
+
+        double l=i*cellWidth.toDouble();
+        double t=j*cellHeight.toDouble();
+
+        if(selectedColumn==i)t+=offset;
+        if(selectedRow==j)l+=offset;
+
         canvas.drawRect(
             Rect.fromLTWH(
-                l.toDouble(),
-                t.toDouble(),
+                l,
+                t,
                 cellWidth.toDouble(),
                 cellHeight.toDouble(),
             ), p);
       }
-    }
-
-    if(selectedColumn!=-1){
-      p.color=Colors.red;
-      canvas.drawRect(Rect.fromLTWH(
-          (selectedColumn*cellWidth).toDouble(),
-          0,
-          cellWidth.toDouble(),
-          size.height),
-      p);
-    }
-    if(selectedRow !=-1){
-      p.color=Colors.red;
-      canvas.drawRect(Rect.fromLTWH(
-          0,
-          (selectedRow*cellHeight).toDouble(),
-          size.width,
-          cellHeight.toDouble()),
-          p);
     }
 
   }
