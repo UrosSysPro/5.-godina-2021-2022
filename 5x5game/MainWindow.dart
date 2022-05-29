@@ -6,18 +6,21 @@ class MainWindow extends StatefulWidget {
   _MainWindowState createState() => _MainWindowState();
 }
 
-class _MainWindowState extends State<MainWindow> {
+class _MainWindowState extends State<MainWindow> with SingleTickerProviderStateMixin {
 
   int size=5;
   late List<List<int>> mat;
   bool didMove=false;
 
-  int selectedRow=-1;
-  int selectedColumn=-1;
+  int selectedRow=-10;
+  int selectedColumn=-10;
   double offset=0;
+
+  late AnimationController controller;
 
   @override
   void initState() {
+
     super.initState();
     mat=[];
     for(int i=0;i<size;i++){
@@ -26,6 +29,24 @@ class _MainWindowState extends State<MainWindow> {
         mat[i].add(i+j*size+1);
       }
     }
+    controller=new AnimationController(
+        vsync: this,
+        duration:Duration(seconds: 1)
+    );
+    controller.value=1;
+    controller.addStatusListener((status) {
+      if(status==AnimationStatus.dismissed){
+        setState((){
+          selectedRow=-10;
+          selectedColumn=-10;
+          controller.value=1;
+        });
+      }
+    });
+    controller.addListener(() {setState((){
+
+    });});
+
   }
 
   @override
@@ -47,8 +68,23 @@ class _MainWindowState extends State<MainWindow> {
           },
           onHorizontalDragEnd: (args){
             setState((){
-              selectedRow=-1;
+              int toMove=(offset/100).round();
+              List<int> noviRed=[];
+              int j=selectedRow;
+              for(int i=0;i<size;i++){
+                int novoI=i-toMove;
+                if(novoI<0)novoI=size+novoI;
+                if(novoI>=size)novoI%=size;
+                noviRed.add(mat[novoI][j]);
+              }
+              for(int i=0;i<size;i++)
+                mat[i][j]=noviRed[i];
+
+              offset=offset-((offset/100).round()*100);
+              double from=(100-offset)/100;
+              controller.reverse(from: from);
             });
+
           },
           onVerticalDragStart: (args){
             setState((){
@@ -78,20 +114,26 @@ class _MainWindowState extends State<MainWindow> {
               }
               for(int j=0;j<size;j++)
                 mat[i][j]=novaKolona[j];
-              selectedColumn=-1;
+              
+              offset=offset-((offset/100).round()*100);
+              double from=(100-offset)/100;
+              controller.reverse(from: from);
             });
 
           },
-          child: SizedBox(
-            width:500,
-            height: 500,
-            child: CustomPaint(
-              painter: GamePainter(
-                  mat,
-                  didMove,
-                  selectedRow,
-                  selectedColumn,
-                  offset
+          child: ClipRect(
+            child: SizedBox(
+              width:500,
+              height: 500,
+              child: CustomPaint(
+                painter: GamePainter(
+                    mat,
+                    didMove,
+                    selectedRow,
+                    selectedColumn,
+                    offset,
+                    controller
+                ),
               ),
             ),
           ),
@@ -109,13 +151,15 @@ class GamePainter extends CustomPainter{
   int selectedRow;
   int selectedColumn;
   double offset;
+  AnimationController controller;
 
   GamePainter(
       this.mat,
       this.didMove,
       this.selectedRow,
       this.selectedColumn,
-      this.offset);
+      this.offset,
+      this.controller);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -125,11 +169,14 @@ class GamePainter extends CustomPainter{
     Paint p=Paint();
     p.style=PaintingStyle.fill;
 
-    for(int i=0;i<mat.length;i++){
-      for(int j=0;j<mat[0].length;j++){
+    for(int i=-mat.length;i<mat.length*2;i++){
+      for(int j=-mat[0].length;j<mat[0].length*2;j++){
+        int q=i%mat.length;
+        int w=j%mat.length;
+
         int size=mat.length;
-        int x=(mat[i][j]-1)%size;
-        int y=((mat[i][j]-1)/size).toInt();
+        int x=(mat[q][w]-1)%size;
+        int y=((mat[q][w]-1)/size).toInt();
 
         int r=(255/mat.length*x).toInt();
         int g=(255/mat[0].length*y).toInt();
@@ -139,8 +186,8 @@ class GamePainter extends CustomPainter{
         double l=i*cellWidth.toDouble();
         double t=j*cellHeight.toDouble();
 
-        if(selectedColumn==i)t+=offset;
-        if(selectedRow==j)l+=offset;
+        if(selectedColumn==i)t+=offset*controller.value;
+        if(selectedRow==j)l+=offset*controller.value;
 
         canvas.drawRect(
             Rect.fromLTWH(
